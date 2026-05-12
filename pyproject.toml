@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.136.0",
+    "pywin32",
     "requests>=2.33.1",
     "uvicorn>=0.44.0",
+    "win32api",
 ]

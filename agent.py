@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import os
+from pathlib import Path
+# import win32api
 
 
 app = FastAPI()
@@ -24,17 +26,17 @@ def print_pdf(data: PrintRequest):
 
     try:
         # 1. download PDF
-        r = requests.get(pdf_url)
-        r.raise_for_status()
+        r = requests.get(pdf_url, verify=False)
+        # r.raise_for_status()
         print('received url ->', pdf_url)
 
         os.makedirs('pdf', exist_ok=True)
-        file_path = 'pdf/label.pdf'
+        file_path = Path('pdf') / Path('label.pdf')
         with open(file_path, "wb") as f:
             f.write(r.content)
 
         # # 2. silent print (Windows only)
-        # os.startfile(file_path, "print")
+        os.startfile(file_path, "print")
 
         return {
             "status": "success",
