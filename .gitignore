@@ -6,8 +6,7 @@ dist/
 wheels/
 *.egg-info
 
-pdf/
-ssl/
+*.pdf
 # Virtual environments
 .venv
 .test
