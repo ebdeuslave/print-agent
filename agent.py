@@ -24,7 +24,8 @@ def print_pdf(data: PrintRequest):
 
     try:
         # 1. download PDF
-        r = requests.get(pdf_url, verify=False)
+        headers = {'Print-Authorization-Token':'4b194607dfd5f63af6e74d11b2d4406a4258aff98c5771a3fa5e437a40cdf765'}
+        r = requests.get(pdf_url, headers=headers, verify=False)
         # r.raise_for_status()
         print('received url ->', pdf_url)
 
