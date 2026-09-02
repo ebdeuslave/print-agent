@@ -17,12 +17,21 @@ app.add_middleware(
 
 class PrintRequest(BaseModel):
     url: str
+    authorization_token: str
 
 @app.post("/print")
 def print_pdf(data: PrintRequest):
+    authorization_token = data.authorization_token
     pdf_url = data.url
 
     try:
+        # check autorization token
+        if authorization_token != "4b194607dfd5f63af6e74d11b2d4406a4258aff98c5771a3fa5e437a40cdf765":
+            return {
+                "status": "error",
+                "message": "Authorization token is invalid"
+            }
+
         # 1. download PDF
         headers = {'Print-Authorization-Token':'4b194607dfd5f63af6e74d11b2d4406a4258aff98c5771a3fa5e437a40cdf765'}
         r = requests.get(pdf_url, headers=headers, verify=False)
@@ -35,7 +44,7 @@ def print_pdf(data: PrintRequest):
             f.write(r.content)
 
         # # 2. silent print (Windows only)
-        os.startfile(file_path, "print")
+        # os.startfile(file_path, "print")
 
         return {
             "status": "success",
