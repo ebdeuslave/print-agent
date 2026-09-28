@@ -1,0 +1,2 @@
+AUTH_TOEKN="4b194607dfd5f63af6e74d11b2d4406a4258aff98c5771a3fa5e437a40cdf765"
+WEBSITE_URL="https://africainternetholding.ma"

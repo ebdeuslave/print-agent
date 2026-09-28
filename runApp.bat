@@ -1,0 +1,3 @@
+@echo off
+start "" pythonw -m uvicorn agent:app --host 0.0.0.0 --port 5000 --ssl-keyfile=ssl/localhost+2-key.pem --ssl-certfile=ssl/localhost+2.pem
+exit

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import requests
 import os
 from pathlib import Path
+from __auth__ import *
 
 app = FastAPI()
 
@@ -26,14 +27,14 @@ def print_pdf(data: PrintRequest):
 
     try:
         # check autorization token
-        if authorization_token != "4b194607dfd5f63af6e74d11b2d4406a4258aff98c5771a3fa5e437a40cdf765":
+        if (authorization_token != AUTH_TOEKN) or not pdf_url.startswith(WEBSITE_URL):
             return {
                 "status": "error",
-                "message": "Authorization token is invalid"
+                "message": "Unauthorized"
             }
 
         # 1. download PDF
-        headers = {'Print-Authorization-Token':'4b194607dfd5f63af6e74d11b2d4406a4258aff98c5771a3fa5e437a40cdf765'}
+        headers = {'Print-Authorization-Token':AUTH_TOEKN}
         r = requests.get(pdf_url, headers=headers, verify=False)
         # r.raise_for_status()
         print('received url ->', pdf_url)
@@ -44,7 +45,7 @@ def print_pdf(data: PrintRequest):
             f.write(r.content)
 
         # # 2. silent print (Windows only)
-        # os.startfile(file_path, "print")
+        os.startfile(file_path, "print")
 
         return {
             "status": "success",
