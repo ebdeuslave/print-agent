@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
-import os
+import os, win32api
 from pathlib import Path
 from __auth__ import *
 
@@ -20,32 +20,45 @@ class PrintRequest(BaseModel):
     url: str
     authorization_token: str
 
+
 @app.post("/print")
 def print_pdf(data: PrintRequest):
     authorization_token = data.authorization_token
     pdf_url = data.url
 
     try:
-        # check autorization token
-        if (authorization_token != AUTH_TOEKN) or not pdf_url.startswith(WEBSITE_URL):
-            return {
-                "status": "error",
-                "message": "Unauthorized"
-            }
+        print("[PRINT] 1. Checking authorization", flush=True)
 
-        # 1. download PDF
-        headers = {'Print-Authorization-Token':AUTH_TOEKN}
-        r = requests.get(pdf_url, headers=headers, verify=False)
-        # r.raise_for_status()
-        print('received url ->', pdf_url)
+        if authorization_token != AUTH_TOEKN or not pdf_url.startswith(WEBSITE_URL):
+            print("[PRINT] Unauthorized request", flush=True)
+            return {"status": "error", "message": "Unauthorized"}
 
-        os.makedirs('pdf', exist_ok=True)
-        file_path = Path('pdf') / Path('label.pdf')
+        print("[PRINT] 2. Downloading PDF...", flush=True)
+
+        headers = {"Print-Authorization-Token": AUTH_TOEKN}
+        r = requests.get(
+            pdf_url,
+            headers=headers,
+            verify=False,
+            timeout=(5, 30)
+        )
+        r.raise_for_status()
+
+        print(f"[PRINT] 3. Download complete: HTTP {r.status_code}, {len(r.content)} bytes", flush=True)
+
+        os.makedirs("pdf", exist_ok=True)
+        file_path = Path("pdf") / "label.pdf"
+
         with open(file_path, "wb") as f:
             f.write(r.content)
 
-        # # 2. silent print (Windows only)
-        os.startfile(file_path, "print")
+        print(f"[PRINT] 4. PDF saved: {file_path.resolve()}", flush=True)
+
+        print("[PRINT] 5. Starting Windows print...", flush=True)
+        os.startfile(str(file_path.resolve()), "print")
+        # win32api.ShellExecute(0, "print", str(file_path), None,  ".",  0)
+
+        print("[PRINT] 6. Print command sent", flush=True)
 
         return {
             "status": "success",
@@ -53,7 +66,5 @@ def print_pdf(data: PrintRequest):
         }
 
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        print(f"[PRINT] ERROR: {type(e).__name__}: {e}", flush=True)
+        raise
